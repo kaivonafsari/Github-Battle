@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { battle } from './../utils/api';
 import {
     FaCompass,
@@ -56,75 +56,88 @@ ProfileList.propTypes = {
     profile: PropTypes.object.isRequired
 };
 
-export default class Results extends React.Component {
-    state = {
+const Results = () => {
+    const initialState = {
         winner: null,
         loser: null,
         error: null,
         loading: true
     };
-
-    componentDidMount = async () => {
-        try {
-            const { playerOne, playerTwo } = queryString.parse(
-                this.props.location.search
-            );
-
-            const [winner, loser] = await battle([playerOne, playerTwo]);
-
-            this.setState({
-                winner,
-                loser,
+    const reducer = (state, action) => {
+        if (action.type === 'success') {
+            return {
+                winner: action.winner,
+                loser: action.loser,
                 error: null,
                 loading: false
-            });
-        } catch (err) {
-            this.setState({ error: err });
+            };
+        } else if (action.type === 'error') {
+            state.error = action.error;
+            return state;
         }
     };
 
-    render() {
-        const { winner, loser, error, loading } = this.state;
+    const [state, dispatch] = useReducer(reducer, initialState);
 
-        if (loading) {
-            return <Loading text="Battling" />;
-        } else if (error) {
-            return <p className="center-text error">{error}</p>;
-        }
+    useEffect(() => {
+        (async () => {
+            try {
+                const { playerOne, playerTwo } = queryString.parse(
+                    location.search
+                );
 
-        const isTied = winner.score === loser.score;
+                const [winner, loser] = await battle([playerOne, playerTwo]);
 
-        return (
-            <>
-                <div className="grid space-around container-sm">
-                    <Card
-                        header={isTied ? 'Tie' : 'Winner'}
-                        subHeader={`Score: ${winner.score.toLocaleString()}`}
-                        avatar={winner.profile.avatar_url}
-                        href={winner.profile.html_url}
-                        name={winner.profile.login}
-                    >
-                        <ProfileList profile={winner.profile} />
-                    </Card>
-                    <Card
-                        header={isTied ? 'Tie' : 'Loser'}
-                        subHeader={`Score: ${loser.score.toLocaleString()}`}
-                        avatar={loser.profile.avatar_url}
-                        href={loser.profile.html_url}
-                        name={loser.profile.login}
-                    >
-                        <ProfileList profile={loser.profile} />
-                    </Card>
-                </div>
-                <Link className="btn dark-btn btn-space" to="/battle">
-                    Reset
-                </Link>
-            </>
-        );
+                dispatch({
+                    type: 'success',
+                    winner,
+                    loser,
+                    error: null,
+                    loading: false
+                });
+            } catch (err) {
+                dispatch({ type: 'error', error: err, loading: false });
+            }
+        })();
+    }, []);
+
+    const { loading, error, winner, loser } = state;
+
+    if (loading) {
+        return <Loading text="Battling" />;
+    } else if (error) {
+        return <p className="center-text error">{error}</p>;
     }
-}
 
-Results.propTypes = {
-    playerOne: PropTypes.string.isRequired,
-    playerTwo: PropTypes.string.isRequired
+    const isTied = winner.score === loser.score;
+
+    return (
+        <>
+            <div className="grid space-around container-sm">
+                <Card
+                    header={isTied ? 'Tie' : 'Winner'}
+                    subHeader={`Score: ${winner.score.toLocaleString()}`}
+                    avatar={winner.profile.avatar_url}
+                    href={winner.profile.html_url}
+                    name={winner.profile.login}
+                >
+                    <ProfileList profile={winner.profile} />
+                </Card>
+                <Card
+                    header={isTied ? 'Tie' : 'Loser'}
+                    subHeader={`Score: ${loser.score.toLocaleString()}`}
+                    avatar={loser.profile.avatar_url}
+                    href={loser.profile.html_url}
+                    name={loser.profile.login}
+                >
+                    <ProfileList profile={loser.profile} />
+                </Card>
+            </div>
+            <Link className="btn dark-btn btn-space" to="/battle">
+                Reset
+            </Link>
+        </>
+    );
 };
+
+export default Results;
