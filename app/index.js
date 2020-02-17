@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ReactDom from 'react-dom';
 import './index.css';
 
@@ -11,49 +11,41 @@ const Popular = React.lazy(() => import('./components/Popular'));
 const Battle = React.lazy(() => import('./components/Battle'));
 const Results = React.lazy(() => import('./components/Results'));
 
-class App extends React.Component {
-    state = {
-        theme: 'light',
-        toggleTheme: () => {
-            this.setState(({ theme }) => {
-                return {
-                    theme: theme === 'light' ? 'dark' : 'light'
-                };
-            });
-        }
+const App = () => {
+    const [theme, setTheme] = useState('light');
+    const toggleTheme = () => {
+        setTheme(theme => {
+            return theme === 'light' ? 'dark' : 'light';
+        });
     };
 
-    render() {
-        const { theme } = this.state;
+    return (
+        <Router>
+            <ThemeProvider value={theme}>
+                <div className={theme}>
+                    <div className="container">
+                        <Nav toggleTheme={toggleTheme} />
 
-        return (
-            <Router>
-                <ThemeProvider value={this.state}>
-                    <div className={theme}>
-                        <div className="container">
-                            <Nav />
-
-                            <React.Suspense fallback={<Loading />}>
-                                <Switch>
-                                    <Route exact path="/" component={Popular} />
-                                    <Route
-                                        exact
-                                        path="/battle"
-                                        component={Battle}
-                                    />
-                                    <Route
-                                        path="/battle/results"
-                                        component={Results}
-                                    />
-                                    <Route render={() => <h1>404</h1>} />
-                                </Switch>
-                            </React.Suspense>
-                        </div>
+                        <React.Suspense fallback={<Loading />}>
+                            <Switch>
+                                <Route exact path="/" component={Popular} />
+                                <Route
+                                    exact
+                                    path="/battle"
+                                    component={Battle}
+                                />
+                                <Route
+                                    path="/battle/results"
+                                    component={Results}
+                                />
+                                <Route render={() => <h1>404</h1>} />
+                            </Switch>
+                        </React.Suspense>
                     </div>
-                </ThemeProvider>
-            </Router>
-        );
-    }
-}
+                </div>
+            </ThemeProvider>
+        </Router>
+    );
+};
 
 ReactDom.render(<App />, document.getElementById('app'));

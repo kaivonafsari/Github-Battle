@@ -1,33 +1,22 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 
-import { ThemeConsumer } from './../context/theme';
+import ThemeContext from './../context/theme';
 
 export const Card = ({ header, subHeader, avatar, href, name, children }) => {
+    const theme = useContext(ThemeContext);
     return (
-        <ThemeConsumer>
-            {({ theme }) => {
-                return (
-                    <div className={`card bg-${theme}`}>
-                        <h4 className="header-lg center-text">{header}</h4>
-                        <img
-                            className="avatar"
-                            src={avatar}
-                            alt={`Avatar for ${avatar}`}
-                        />
-                        {subHeader && (
-                            <h4 className="center-text">{subHeader}</h4>
-                        )}
-                        <h2 className="center-text">
-                            <a className="link" href={href}>
-                                {name}
-                            </a>
-                        </h2>
-                        {children}
-                    </div>
-                );
-            }}
-        </ThemeConsumer>
+        <div className={`card bg-${theme}`}>
+            <h4 className="header-lg center-text">{header}</h4>
+            <img className="avatar" src={avatar} alt={`Avatar for ${avatar}`} />
+            {subHeader && <h4 className="center-text">{subHeader}</h4>}
+            <h2 className="center-text">
+                <a className="link" href={href}>
+                    {name}
+                </a>
+            </h2>
+            {children}
+        </div>
     );
 };
 
