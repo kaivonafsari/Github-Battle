@@ -9,6 +9,7 @@ import {
     FaUser
 } from 'react-icons/fa';
 import PropTypes from 'prop-types';
+import { useLocation } from 'react-router-dom';
 
 import Card from './Card';
 import Loading from './Loading';
@@ -79,13 +80,12 @@ const Results = () => {
 
     const [state, dispatch] = useReducer(reducer, initialState);
 
+    const location = useLocation();
+    const { playerOne, playerTwo } = queryString.parse(location.search);
+
     useEffect(() => {
         (async () => {
             try {
-                const { playerOne, playerTwo } = queryString.parse(
-                    location.search
-                );
-
                 const [winner, loser] = await battle([playerOne, playerTwo]);
 
                 dispatch({
@@ -99,7 +99,7 @@ const Results = () => {
                 dispatch({ type: 'error', error: err, loading: false });
             }
         })();
-    }, []);
+    }, [playerOne, playerTwo]);
 
     const { loading, error, winner, loser } = state;
 
