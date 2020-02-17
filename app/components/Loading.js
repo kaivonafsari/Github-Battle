@@ -17,9 +17,9 @@ const Loading = ({ text, speed }) => {
 
     useEffect(() => {
         const interval = setInterval(() => {
-            content === text + '...'
-                ? setContent(text)
-                : setContent(content => content + '.');
+            setContent(content => {
+                return content === text + '...' ? text : content + '.';
+            });
         }, speed);
 
         return () => clearInterval(interval);
